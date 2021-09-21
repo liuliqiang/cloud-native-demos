@@ -1,0 +1,13 @@
+vendor/
+.build/
+
+.idea
+
+# infrature
+.vagrant
+.vagrant.yaml
+.terraform
+tarraform.*
+terraform.tfstate
+terraform.tfstate.backup
+deploy/terraform/.terraform.lock.hcl
