@@ -18,16 +18,10 @@ A demo for envoy xds and grpc
     # go run cmd/client/client.go -port 3000 
     ```
 
-- ads
+- xds
 
     ```
-    # go run cmd/xds/main.go -ads
-    ```
-
-- xds-grpc-client
-  
-    ```
-    # make run-xds-grpc
+    # go run cmd/xds/main.go
     ```
 
 ### Envoy
