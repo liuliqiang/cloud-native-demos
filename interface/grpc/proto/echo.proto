@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "interface/grpc/gen/echo/v1;echo";
+
+package echo;
+
+service echo{
+    rpc Ping( Message ) returns ( Message );
+}
+
+message Message {
+    string say = 1;
+}
