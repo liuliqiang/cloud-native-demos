@@ -22,16 +22,20 @@ setup:
 	mkdir -p .build
 
 server: setup
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o .build/server cmd/server/*.go
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -gcflags="all=-N -l" -o .build/server cmd/server/*.go
 
 client: setup
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o .build/client cmd/client/*.go
 
-docker: server client
+docker:
 	docker build --tag $(docker_image) -f ./build/docker/Dockerfile .
 
 up:
-	docker run --rm -p 9000:9000 --name grpc-server -d $(docker_image) /home/liqiang/server
+	docker run --rm \
+		-p 9000:9000 \
+		-p 2345:2345 \
+		--name grpc-server -d \
+		$(docker_image)
 
 down:
 	docker stop grpc-server
