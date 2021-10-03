@@ -1,4 +1,7 @@
 export GO111MODULE=on
+export image_name=lukelau/basic_grpc_client-server
+export version=v0.0.1
+export docker_image=$(image_name):$(version)
 
 ifndef GOOS
 	GOOS=linux
@@ -7,7 +10,11 @@ ifndef GOARCH
 	GOARCH=amd64
 endif
 
-.PHONY: protoc
+.PHONY: protoc clean
+
+clean:
+	rm -rf .build
+
 protoc:
 	@protoc -I interface/grpc/proto echo.proto --go_out=plugins=grpc:.
 
@@ -17,35 +24,17 @@ setup:
 server: setup
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o .build/server cmd/server/*.go
 
-http-server: setup
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o .build/main cmd/http-server/*.go
-
 client: setup
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o .build/client cmd/client/*.go
 
-xds:
-	mkdir -p .build
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o .build/xds cmd/xds/*.go
-
 docker: server client
-	docker build --tag lukelau/demo:0.0.1 -f ./build/docker/Dockerfile .
-
-docker-http: http-server
-	docker build --tag lukelau/http-server:v0.0.3 -f ./build/docker/Dockerfile-common .
+	docker build --tag $(docker_image) -f ./build/docker/Dockerfile .
 
 up:
-	docker-compose -f deploy/compose/22-primary-secondary.yml up -d
+	docker run --rm -p 9000:9000 --name grpc-server -d $(docker_image) /home/liqiang/server
 
 down:
-	docker-compose -f deploy/compose/22-primary-secondary.yml down
+	docker stop grpc-server
 
-run-xds-grpc:
-	GRPC_GO_LOG_VERBOSITY_LEVEL=100 \
-	GRPC_GO_LOG_SEVERITY_LEVEL=WARN \
-	GRPC_XDS_BOOTSTRAP=$(shell pwd)/deploy/grpc/bootstrap.json \
-	go run cmd/xds-grpc-client/main.go
-
-run-http-server:
-	go run cmd/http-server/*.go \
-	    -static $(shell pwd)/interface/http/assets \
-	    -store /tmp
+run-client:
+	go run cmd/client/main.go
