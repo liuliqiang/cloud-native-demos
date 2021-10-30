@@ -9,7 +9,7 @@ services:
         ports:
         - 3000:3000
         labels:
-            branch: master
+            branch: docker/golang-sdk
     server-3001:
         image: "lukelau/http-server:v0.0.3"
         command: "/home/liqiang/main
@@ -19,7 +19,7 @@ services:
         ports:
         - 3001:3000
         labels:
-            branch: master
+            branch: docker/golang-sdk
     server-3002:
         image: "lukelau/http-server:v0.0.3"
         command: "/home/liqiang/main
@@ -29,4 +29,4 @@ services:
         ports:
         - 3002:3000
         labels:
-            branch: master
+            branch: docker/golang-sdk
