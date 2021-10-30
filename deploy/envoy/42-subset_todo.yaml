@@ -1,0 +1,78 @@
+static_resources:
+  listeners:
+    - name: listener_0
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 3333
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                codec_type: AUTO
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: local_service
+                      domains: [ "*" ]
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: simple_http_service
+                http_filters:
+                  - name: envoy.filters.http.router
+  clusters:
+    - name: simple_http_service
+      connect_timeout: 0.25s
+      type: STATIC
+      lb_policy: ROUND_ROBIN
+      load_balancing_policy: 
+      lb_subset_config:
+        fallback_policy: DEFAULT_SUBSET # NO_FALLBACK/ANY_ENDPOINT/DEFAULT_SUBSET
+        default_subset:   # for endpoints[x].lb_endpoints[y].metadata
+          branch: master
+        subset_selectors:
+        - keys: ["branch"]
+        - keys: ["port"]
+      common_lb_config:
+        locality_weighted_lb_config: {}
+      load_assignment:
+        cluster_name: simple_http_service
+        endpoints:
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: 127.0.0.1
+                  port_value: 3000
+            load_balancing_weight: 50
+          load_balancing_weight: 50
+          locality:
+            region: "cn"
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: 127.0.0.1
+                  port_value: 3001
+            load_balancing_weight: 75
+          - endpoint:
+              address:
+                socket_address:
+                  address: 127.0.0.1
+                  port_value: 3002
+            load_balancing_weight: 25
+          load_balancing_weight: 50
+          locality:
+            region: "sg"
+            # region > zone > sub_zone
+            # zone: ""
+            # sub_zone: ""
+# {
+#   "3001": 375,
+#   "3000": 503,
+#   "3002": 122
+# }

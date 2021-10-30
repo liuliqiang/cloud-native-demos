@@ -21,30 +21,36 @@ static_resources:
                         - match:
                             prefix: "/"
                           route:
-                            cluster: some_service
+                            cluster: simple_http_service
                 http_filters:
                   - name: envoy.filters.http.router
   clusters:
-    - name: some_service
+    - name: simple_http_service
       connect_timeout: 0.25s
       type: STATIC
       lb_policy: ROUND_ROBIN
       load_assignment:
-        cluster_name: some_service
+        cluster_name: simple_http_service
         endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: 127.0.0.1
-                      port_value: 3000
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: 127.0.0.1
-                      port_value: 3001
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: 127.0.0.1
-                      port_value: 3002
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: 127.0.0.1
+                  port_value: 3000
+            load_balancing_weight: 70
+          # load_balancing_weight: 70
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: 127.0.0.1
+                  port_value: 3001
+            load_balancing_weight: 20
+          - endpoint:
+              address:
+                socket_address:
+                  address: 127.0.0.1
+                  port_value: 3002
+            load_balancing_weight: 10
+          # load_balancing_weight: 10
